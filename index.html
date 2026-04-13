@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MARS STUDIO | eFootball 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ef-navy: #001838;
+            --ef-lime: #e2ff00;
+            --ef-cyan: #00e5ff;
+            --dark-pitch: #010811;
+            --glass: rgba(255, 255, 255, 0.05);
+            --bkash-pink: #d12053;
+            --nagad-orange: #f7941d;
+            --status-allowed: #23a55a;
+            --status-banned: #f23f43;
+            --status-pending: #ffffff;
+        }
+
+        body {
+            background-color: var(--dark-pitch);
+            color: #ffffff;
+            font-family: 'Oswald', sans-serif;
+            margin: 0; padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- HIDDEN AESTHETIC HOST BUTTON --- */
+        .host-top-access {
+            width: 100%;
+            height: 30px;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .host-top-access:hover { background: rgba(226, 255, 0, 0.05); }
+        .host-icon {
+            width: 6px; height: 6px;
+            background: #111; /* Extremely subtle dark color */
+            border-radius: 50%;
+        }
+
+        header {
+            background: linear-gradient(180deg, var(--ef-navy) 0%, #000 100%);
+            padding: 40px 10px;
+            text-align: center;
+            border-bottom: 3px solid var(--ef-lime);
+        }
+
+        h1.main-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.8rem, 8vw, 3rem);
+            margin: 0;
+            color: var(--ef-lime);
+            text-transform: uppercase;
+            letter-spacing: 6px;
+        }
+
+        .nav-container {
+            background: rgba(0,0,0,0.9);
+            border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+            position: sticky; top: 0; z-index: 1000;
+            width: 100%; overflow-x: auto; white-space: nowrap;
+        }
+
+        .nav-menu { display: inline-flex; padding: 0 10px; min-width: 100%; }
+        .nav-btn {
+            background: none; border: none; color: #666;
+            padding: 18px 22px; font-family: 'Oswald', sans-serif;
+            font-weight: 700; text-transform: uppercase;
+            cursor: pointer; font-size: 0.85rem;
+        }
+        .nav-btn.active { color: var(--ef-cyan); box-shadow: inset 0 -3px 0 var(--ef-cyan); }
+
+        .page { display: none; max-width: 600px; margin: 20px auto; padding: 15px; }
+        .page.active { display: block; }
+
+        .stadium-card {
+            background: var(--glass);
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            padding: 30px; border-radius: 4px;
+        }
+
+        h2 { font-family: 'Cinzel', serif; color: var(--ef-lime); font-size: 1.2rem; text-align: center; margin-top: 0; letter-spacing: 2px;}
+
+        input, textarea {
+            width: 100%; padding: 14px; margin-bottom: 15px;
+            background: rgba(0,0,0,0.6); border: 1px solid #222;
+            color: white; box-sizing: border-box; font-family: 'Oswald', sans-serif;
+        }
+
+        .submit-btn {
+            width: 100%; padding: 16px;
+            background: var(--ef-lime); color: var(--ef-navy);
+            font-weight: 900; border: none; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* --- LOGO PAYMENT BUTTONS --- */
+        .pay-logo-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; padding: 12px; margin: 10px 0;
+            border: none; border-radius: 5px; cursor: pointer;
+            font-weight: bold; font-family: 'Oswald'; font-size: 1.1rem;
+            color: white; gap: 10px;
+        }
+        .btn-nagad { background: var(--nagad-orange); }
+        .btn-bkash { background: var(--bkash-pink); }
+        .brand-icon { width: 30px; height: 30px; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-weight: 900; font-size: 0.7rem; }
+
+        /* --- RULES LIST --- */
+        .rules-list { color: #aaa; font-size: 0.95rem; line-height: 2; list-style: none; padding: 0; }
+        .rules-list li { border-left: 2px solid var(--ef-cyan); padding-left: 15px; margin-bottom: 10px; }
+
+        /* --- STATUS DOTS --- */
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 10px; }
+        .dot-allowed { background: var(--status-allowed); box-shadow: 0 0 8px var(--status-allowed); }
+        .dot-banned { background: var(--status-banned); box-shadow: 0 0 8px var(--status-banned); }
+        .dot-pending { background: var(--status-pending); box-shadow: 0 0 8px var(--status-pending); }
+
+        .host-ui { display: none; margin-top: 20px; padding: 15px; border: 1px dashed var(--ef-lime); }
+
+        .payment-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.98); z-index: 10000; justify-content: center; align-items: center; padding: 20px;
+        }
+        .payment-box { background: var(--ef-navy); border: 1px solid var(--ef-cyan); width: 100%; max-width: 400px; padding: 30px; text-align: center; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { background: rgba(0, 24, 56, 0.9); color: var(--ef-cyan); padding: 15px; text-align: left; font-size: 0.7rem; text-transform: uppercase;}
+        td { padding: 15px; border-bottom: 1px solid #111; font-size: 0.9rem;}
+    </style>
+</head>
+<body>
+
+    <div class="host-top-access" onclick="accessHostMod()">
+        <div class="host-icon"></div>
+    </div>
+
+    <header>
+        <h1 class="main-title">MARS STUDIO</h1>
+    </header>
+
+    <div class="nav-container">
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="showPage('reg', this)">Registration</button>
+            <button class="nav-btn" onclick="showPage('rules', this)">Rules</button>
+            <button class="nav-btn" onclick="showPage('date', this)">Schedule</button>
+            <button class="nav-btn" onclick="showPage('list', this)">Roster</button>
+        </div>
+    </div>
+
+    <section id="reg" class="page active">
+        <div class="stadium-card">
+            <h2>TOURNAMENT ENTRY</h2>
+            <form id="regForm">
+                <input type="text" id="p_name" placeholder="GAMER NAME" required>
+                <input type="tel" id="p_num" placeholder="WHATSAPP NUMBER" required>
+                <input type="text" id="p_id" placeholder="EFOOTBALL ID" required>
+                <input type="number" id="p_str" placeholder="TEAM STRENGTH (3100-3200)" required>
+                <button type="submit" class="submit-btn">PROCEED TO GATEWAY</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="rules" class="page">
+        <div class="stadium-card">
+            <h2>OFFICIAL REGULATIONS</h2>
+            <ul class="rules-list">
+                <li>Entry fee: 50 TK (Strictly no refunds).</li>
+                <li>Players must ensure a powerful network connection.</li>
+                <li>Loss of connection results in an immediate match loss.</li>
+                <li>Team strength must be within 3100 - 3200 limit.</li>
+                <li>Zero tolerance for violence or verbal abuse.</li>
+                <li>Racism is strictly prohibited.</li>
+                <li>Rule breakers will be banned with no refund.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="date" class="page">
+        <div class="stadium-card" style="text-align: center;">
+            <h2>MATCH SCHEDULE</h2>
+            <div id="dateDisplay" style="padding: 20px; border: 1px solid var(--ef-cyan); background: rgba(0, 229, 255, 0.05);">
+                <h1 id="liveDate" style="margin: 0; font-size: 2rem;">25 APRIL 2026</h1>
+                <p style="color: var(--ef-lime);">10:00 PM BDT</p>
+            </div>
+            <div class="host-ui" id="hostDateUI">
+                <input type="text" id="inDate" placeholder="Edit Date/Time">
+                <button class="submit-btn" onclick="saveDate()">Update Schedule</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="list" class="page" style="max-width: 900px;">
+        <div class="stadium-card">
+            <h2>PLAYER ROSTER</h2>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Player</th>
+                            <th>Team Str</th>
+                            <th>Trx ID</th>
+                            <th class="host-cell" style="display:none;">Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rosterData"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <div id="payModal" class="payment-modal">
+        <div class="payment-box">
+            <h2 style="color: var(--ef-lime);">SECURE PAYMENT</h2>
+            
+            <button class="pay-logo-btn btn-nagad" onclick="openGate('n')">
+                <div class="brand-icon" style="color:var(--nagad-orange)">N</div> NAGAD OFFICIAL
+            </button>
+
+            <button class="pay-logo-btn btn-bkash" onclick="openGate('b')">
+                <div class="brand-icon" style="color:var(--bkash-pink)">b</div> bKASH OFFICIAL
+            </button>
+
+            <div id="gate_n" style="display:none; text-align:left; margin-top:20px;">
+                <p style="font-size: 0.8rem;">SEND MONEY TO:</p>
+                <div id="nagadNumDisplay" style="color: var(--nagad-orange); font-weight: bold; margin-bottom: 10px;">01601258881</div>
+                <input type="text" id="trx_n" placeholder="Transaction ID">
+                <button class="submit-btn" onclick="finishReg('Nagad')">VERIFY PAYMENT</button>
+            </div>
+
+            <div id="gate_b" style="display:none; text-align:left; margin-top:20px;">
+                <p style="font-size: 0.8rem;">SEND MONEY TO:</p>
+                <div id="bkashNumDisplay" style="color: var(--bkash-pink); font-weight: bold; margin-bottom: 10px;">01906051044</div>
+                <input type="text" id="trx_b" placeholder="Transaction ID">
+                <button class="submit-btn" onclick="finishReg('bKash')">VERIFY PAYMENT</button>
+            </div>
+
+            <div class="host-ui" id="hostNumUI" style="margin-top:20px; border-top: 1px solid #333; padding-top: 10px;">
+                <p style="font-size: 0.7rem;">ADMIN: UPDATE NUMBERS</p>
+                <input type="text" id="setNagad" placeholder="New Nagad Number">
+                <input type="text" id="setBkash" placeholder="New bKash Number">
+                <button class="submit-btn" style="background:#444; color:white;" onclick="saveNumbers()">Save Numbers</button>
+            </div>
+
+            <button onclick="document.getElementById('payModal').style.display='none'" style="background:none; border:none; color:#444; margin-top:20px; cursor:pointer; font-size: 0.8rem;">CLOSE GATEWAY</button>
+        </div>
+    </div>
+
+    <script>
+        let isHost = false;
+        let playerData = null;
+
+        function showPage(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(btn) btn.classList.add('active');
+        }
+
+        // --- HOST AUTH ---
+        function accessHostMod() {
+            const pw = prompt("Admin Credential:");
+            if(pw === "Redowan12") {
+                isHost = true;
+                alert("ADMIN MODE ENABLED");
+                document.querySelectorAll('.host-ui').forEach(u => u.style.display = 'block');
+                document.querySelectorAll('.host-cell').forEach(c => c.style.display = 'table-cell');
+                renderRoster();
+            }
+        }
+
+        // --- REGISTRATION & VALIDATION ---
+        document.getElementById('regForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const strength = parseInt(document.getElementById('p_str').value);
+            
+            // Hard Limit Validation
+            if(strength < 3100 || strength > 3200) {
+                alert("REGISTRATION DENIED: Team strength must be between 3100 and 3200.");
+                return;
+            }
+
+            playerData = {
+                name: document.getElementById('p_name').value,
+                num: document.getElementById('p_num').value,
+                id: document.getElementById('p_id').value,
+                str: strength,
+                status: 'pending'
+            };
+            document.getElementById('payModal').style.display = 'flex';
+        });
+
+        function openGate(g) {
+            document.getElementById('gate_n').style.display = g === 'n' ? 'block' : 'none';
+            document.getElementById('gate_b').style.display = g === 'b' ? 'block' : 'none';
+        }
+
+        function finishReg(method) {
+            const trx = method === 'Nagad' ? document.getElementById('trx_n').value : document.getElementById('trx_b').value;
+            if(!trx) return alert("Trx ID required");
+            let list = JSON.parse(localStorage.getItem('mars_v10')) || [];
+            list.push({...playerData, method, trx});
+            localStorage.setItem('mars_v10', JSON.stringify(list));
+            location.reload();
+        }
+
+        // --- HOST UPDATES ---
+        function saveDate() {
+            localStorage.setItem('mars_match_date', document.getElementById('inDate').value);
+            location.reload();
+        }
+
+        function saveNumbers() {
+            localStorage.setItem('mars_nagad_num', document.getElementById('setNagad').value);
+            localStorage.setItem('mars_bkash_num', document.getElementById('setBkash').value);
+            alert("Payment numbers updated");
+            location.reload();
+        }
+
+        function setStatus(i, s) {
+            let list = JSON.parse(localStorage.getItem('mars_v10'));
+            list[i].status = s;
+            localStorage.setItem('mars_v10', JSON.stringify(list));
+            renderRoster();
+        }
+
+        function renderRoster() {
+            let list = JSON.parse(localStorage.getItem('mars_v10')) || [];
+            document.getElementById('rosterData').innerHTML = list.map((p, i) => {
+                let dot = p.status === 'allowed' ? 'dot-allowed' : (p.status === 'banned' ? 'dot-banned' : 'dot-pending');
+                return `<tr>
+                    <td><span class="status-dot ${dot}"></span></td>
+                    <td>${p.name}</td>
+                    <td>${p.str}</td>
+                    <td style="color:var(--ef-cyan); font-family:monospace">${p.trx}</td>
+                    ${isHost ? `<td>
+                        <button onclick="setStatus(${i},'allowed')" style="background:green;color:white;border:none;padding:5px;">OK</button>
+                        <button onclick="setStatus(${i},'banned')" style="background:red;color:white;border:none;padding:5px;">X</button>
+                    </td>` : ''}
+                </tr>`;
+            }).join('');
+        }
+
+        window.onload = () => {
+            renderRoster();
+            if(localStorage.getItem('mars_match_date')) document.getElementById('liveDate').innerText = localStorage.getItem('mars_match_date');
+            if(localStorage.getItem('mars_nagad_num')) document.getElementById('nagadNumDisplay').innerText = localStorage.getItem('mars_nagad_num');
+            if(localStorage.getItem('mars_bkash_num')) document.getElementById('bkashNumDisplay').innerText = localStorage.getItem('mars_bkash_num');
+        };
+    </script>
+</body>
+</html>
